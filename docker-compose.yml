@@ -1,0 +1,53 @@
+# Stack del backend: PostgreSQL + API FastAPI.
+# Uso: docker compose up --build   (desde la raíz del monorepo)
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: qa
+      POSTGRES_PASSWORD: qa_password
+      POSTGRES_DB: qa_showcase
+    ports:
+      # Host 5433 para no chocar con un PostgreSQL local en 5432.
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # El backend espera a que Postgres esté realmente listo, no sólo arrancado.
+      test: ["CMD-SHELL", "pg_isready -U qa -d qa_showcase"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+asyncpg://qa:qa_password@postgres:5432/qa_showcase
+      CORS_ORIGINS: http://localhost:3000,http://localhost:8088
+    ports:
+      - "8000:8000"
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
+      args:
+        # URL pública: la usa el navegador (Live Run). Debe ser alcanzable desde
+        # el host, por eso localhost:8000.
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      - backend
+    environment:
+      # URL interna: la usa el SSR dentro de la red de compose para llegar al
+      # backend por su nombre de servicio.
+      API_INTERNAL_URL: http://backend:8000
+    ports:
+      - "8088:3000"
+
+volumes:
+  pgdata:

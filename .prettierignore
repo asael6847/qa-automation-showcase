@@ -1,0 +1,11 @@
+node_modules
+dashboard/.next
+**/dist
+tests/playwright-report
+tests/test-results
+pnpm-lock.yaml
+
+# Python / backend (no formatear con Prettier; usa ruff + black)
+backend/.venv
+backend/**/__pycache__
+uv.lock

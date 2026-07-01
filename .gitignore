@@ -1,0 +1,38 @@
+# Dependencias
+node_modules/
+.pnpm-store/
+
+# Builds
+dashboard/.next/
+dashboard/out/
+**/dist/
+
+# Playwright
+tests/test-results/
+tests/playwright-report/
+tests/blob-report/
+tests/.playwright/
+
+# Reportes generados en cada corrida (los de ejemplo viven en dashboard/public/runs y SÍ se commitean)
+tests/reports/
+
+# Backend Python / uv
+backend/.venv/
+**/__pycache__/
+*.pyc
+backend/.pytest_cache/
+backend/.ruff_cache/
+
+# Entorno
+.env
+.env.local
+*.log
+
+# OS / editores
+.DS_Store
+.idea/
+.vscode/
+
+# Markdown / documentación (no se sube al repo)
+*.md
+*.MD

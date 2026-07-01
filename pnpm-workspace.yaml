@@ -1,0 +1,6 @@
+packages:
+  - 'tests'
+  - 'dashboard'
+allowBuilds:
+  sharp: false
+  unrs-resolver: false

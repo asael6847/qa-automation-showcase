@@ -1,0 +1,51 @@
+name: Backend
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    name: Lint + pytest (FastAPI)
+    runs-on: ubuntu-latest
+
+    # PostgreSQL de servicio para los tests de integración.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: qa
+          POSTGRES_PASSWORD: qa_password
+          POSTGRES_DB: qa_showcase_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U qa -d qa_showcase_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Setup Python
+        run: uv python install 3.11
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Ruff (lint)
+        run: uv run ruff check .
+
+      - name: Pytest
+        # Los tests usan SQLite async por defecto; no dependen del Postgres de
+        # servicio, pero lo dejamos disponible por si se quieren correr contra él.
+        run: uv run pytest -q

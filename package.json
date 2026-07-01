@@ -1,0 +1,21 @@
+{
+  "name": "qa-automation-showcase",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Suite E2E con patrón Screenplay (Playwright + TS) sobre SauceDemo, con dashboard de calidad en Next.js.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "pnpm --filter tests test",
+    "test:report": "pnpm --filter tests show-report",
+    "report:save": "node scripts/save-run.mjs",
+    "dashboard:dev": "pnpm --filter dashboard dev",
+    "dashboard:build": "pnpm --filter dashboard build",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
+}

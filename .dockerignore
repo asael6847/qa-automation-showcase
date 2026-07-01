@@ -1,0 +1,8 @@
+**/node_modules
+dashboard/.next
+dashboard/out
+**/dist
+tests/playwright-report
+tests/test-results
+tests/reports
+.git
