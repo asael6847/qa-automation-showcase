@@ -5,3 +5,10 @@ services:
   postgres:
     ports: !override
       - "5434:5432"
+
+  # El backend corre en LOCAL (fuera de Docker) para habilitar el Live Run, que
+  # necesita el toolchain JS (pnpm + Playwright) ausente en la imagen Python.
+  # Por eso el SSR del dashboard apunta al backend del host vía host.docker.internal.
+  dashboard:
+    environment:
+      API_INTERNAL_URL: http://host.docker.internal:8000
