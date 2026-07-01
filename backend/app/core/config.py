@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     run_tests_cmd: str = "pnpm --filter tests test"
     monorepo_root: str = ".."
 
+    # Retardo (ms) entre acciones en ejecución supervisada (headed), para que se
+    # pueda seguir a ojo lo que hace el navegador. 0 = sin retardo (headless/CI).
+    headed_slowmo_ms: int = 900
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

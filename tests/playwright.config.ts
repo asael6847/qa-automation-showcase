@@ -27,6 +27,11 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     trace: 'on-first-retry',
     actionTimeout: 10_000,
+    launchOptions: {
+      // Retardo (ms) entre acciones. 0 en headless/CI; en ejecución supervisada
+      // el backend exporta PW_SLOWMO para que la corrida se vea a ojo humano.
+      slowMo: Number(process.env.PW_SLOWMO ?? 0),
+    },
   },
   projects: [
     {
