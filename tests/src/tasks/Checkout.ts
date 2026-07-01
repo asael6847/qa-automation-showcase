@@ -1,12 +1,13 @@
-import { Actor, BrowseTheWeb, Task } from '@screenplay';
-import { InventoryPage } from '../pages/InventoryPage';
-import { CartPage } from '../pages/CartPage';
-import { CheckoutPage } from '../pages/CheckoutPage';
+import { Actor, Task } from '@screenplay';
+import { ProceedToCheckout } from './ProceedToCheckout';
+import { ProvideCheckoutDetails } from './ProvideCheckoutDetails';
+import { FinishPurchase } from './FinishPurchase';
 
 /**
  * Task de alto nivel: completa el checkout end-to-end asumiendo que ya hay al
- * menos un producto en el carrito. Encapsula la navegación carrito → datos →
- * finalizar, de modo que el spec exprese sólo la intención.
+ * menos un producto en el carrito. Compone las tres tasks granulares (ir al
+ * checkout → datos → finalizar), de modo que el spec exprese sólo la intención
+ * y los pasos queden reutilizables por separado.
  */
 export class Checkout implements Task {
   private constructor(
@@ -20,19 +21,10 @@ export class Checkout implements Task {
   }
 
   async performAs(actor: Actor): Promise<void> {
-    const page = actor.abilityTo(BrowseTheWeb).currentPage();
-
-    // Carrito → checkout.
-    await page.click(InventoryPage.shoppingCartLink);
-    await page.click(CartPage.checkoutButton);
-
-    // Datos del comprador.
-    await page.fill(CheckoutPage.firstNameInput, this.firstName);
-    await page.fill(CheckoutPage.lastNameInput, this.lastName);
-    await page.fill(CheckoutPage.postalCodeInput, this.postalCode);
-    await page.click(CheckoutPage.continueButton);
-
-    // Confirmación final.
-    await page.click(CheckoutPage.finishButton);
+    await actor.attemptsTo(
+      ProceedToCheckout.now(),
+      ProvideCheckoutDetails.withCustomerDetails(this.firstName, this.lastName, this.postalCode),
+      FinishPurchase.now(),
+    );
   }
 }
