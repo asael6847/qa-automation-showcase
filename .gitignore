@@ -16,6 +16,10 @@ tests/.playwright/
 # Reportes generados en cada corrida (los de ejemplo viven en dashboard/public/runs y SÍ se commitean)
 tests/reports/
 
+# Evidencia generada (PDF de pasos + su reporte HTML)
+tests/evidence/
+tests/evidence-report/
+
 # Backend Python / uv
 backend/.venv/
 **/__pycache__/

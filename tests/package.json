@@ -7,6 +7,7 @@
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "show-report": "playwright show-report",
+    "evidence": "playwright test --config=playwright.evidence.config.ts",
     "lint": "eslint \"src/**/*.ts\""
   },
   "devDependencies": {
