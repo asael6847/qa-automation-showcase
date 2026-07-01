@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getAllRuns } from '@/lib/data';
+import { getAllRuns, getLatestRun } from '@/lib/data';
 import { SummaryCards } from '@/components/SummaryCards';
 import { PassFailChart } from '@/components/PassFailChart';
 import { TrendChart, type TrendPoint } from '@/components/TrendChart';
@@ -15,8 +15,10 @@ import { RunStatusBadge } from '@/components/StatusBadge';
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  const runs = await getAllRuns();
-  const latest = runs[0];
+  // `getAllRuns` alimenta tendencia e historial (resúmenes). `getLatestRun` trae
+  // la última corrida *con sus tests* (el endpoint de lista los omite), para que
+  // la tabla de "Tests de la última corrida" no quede vacía en modo backend.
+  const [runs, latest] = await Promise.all([getAllRuns(), getLatestRun()]);
 
   if (!latest) {
     return (

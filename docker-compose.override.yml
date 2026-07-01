@@ -1,0 +1,7 @@
+# Override local: el puerto host 5433 ya lo ocupa otro proyecto (qa_db).
+# Remapeamos el Postgres de este stack a 5434 en el host. El backend sigue
+# conectando internamente por postgres:5432, así que esto no afecta el flujo.
+services:
+  postgres:
+    ports: !override
+      - "5434:5432"
