@@ -17,6 +17,7 @@ Productor (hilo) y consumidor (coroutine) se comunican sólo a través del buffe
 
 from __future__ import annotations
 
+import os
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 
@@ -27,17 +28,34 @@ from app.core.execution_buffer import execution_buffer
 _executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="suite-runner")
 
 
-def _run_blocking(execution_id: str) -> None:
+def _build_cmd(base_cmd: str, headed: bool) -> str:
+    """Comando final. En modo supervisado (headed) forzamos navegador visible y
+    un solo worker para que la ejecución sea secuencial y se pueda seguir a ojo.
+    El `--` reenvía los flags a Playwright a través de pnpm."""
+    if headed:
+        return f"{base_cmd} -- --headed --workers=1"
+    return base_cmd
+
+
+def _run_blocking(execution_id: str, headed: bool) -> None:
     """Corre la suite y vuelca su salida al buffer. Se ejecuta en un hilo."""
     settings = get_settings()
+    cmd = _build_cmd(settings.run_tests_cmd, headed)
     execution_buffer.start(execution_id)
-    execution_buffer.append(execution_id, f"$ {settings.run_tests_cmd}")
+    execution_buffer.append(execution_id, f"$ {cmd}")
+
+    # En modo supervisado exportamos PW_SLOWMO; playwright.config.ts lo aplica
+    # como launchOptions.slowMo para que la corrida se vea a velocidad humana.
+    env = dict(os.environ)
+    if headed:
+        env["PW_SLOWMO"] = str(settings.headed_slowmo_ms)
 
     try:
         process = subprocess.Popen(
-            settings.run_tests_cmd,
+            cmd,
             shell=True,
             cwd=settings.monorepo_root,
+            env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # mezclamos stderr en el mismo stream.
             text=True,
@@ -54,6 +72,10 @@ def _run_blocking(execution_id: str) -> None:
         execution_buffer.finish(execution_id)
 
 
-def start_suite_run(execution_id: str) -> None:
-    """Despacha la corrida al ThreadPool y retorna de inmediato (no bloquea)."""
-    _executor.submit(_run_blocking, execution_id)
+def start_suite_run(execution_id: str, headed: bool = False) -> None:
+    """Despacha la corrida al ThreadPool y retorna de inmediato (no bloquea).
+
+    `headed=True` ejecuta con navegador visible (ejecución supervisada); por
+    defecto corre headless (ejecución desatendida, en segundo plano).
+    """
+    _executor.submit(_run_blocking, execution_id, headed)

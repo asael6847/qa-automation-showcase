@@ -12,23 +12,31 @@ const DONE = '__DONE__';
  * leyendo el cuerpo de la respuesta como un stream (ReadableStream + reader).
  * Esto demuestra el camino streaming end-to-end: subprocess → buffer → HTTP → UI.
  */
+type RunMode = 'supervised' | 'unattended';
+
 export function LiveRun() {
   const [lines, setLines] = useState<string[]>([]);
-  const [running, setRunning] = useState(false);
+  // Modo en curso, o null si no hay ejecución activa.
+  const [runningMode, setRunningMode] = useState<RunMode | null>(null);
   const [done, setDone] = useState(false);
   const logRef = useRef<HTMLPreElement>(null);
+
+  const running = runningMode !== null;
 
   // Auto-scroll al fondo conforme llegan líneas.
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight });
   }, [lines]);
 
-  async function start() {
+  async function start(mode: RunMode) {
+    if (running) return;
     setLines([]);
     setDone(false);
-    setRunning(true);
+    setRunningMode(mode);
     try {
-      const res = await fetch(`${API_URL}/api/v1/execute`, { method: 'POST' });
+      // headed=true -> ejecución supervisada (navegador visible).
+      const headed = mode === 'supervised';
+      const res = await fetch(`${API_URL}/api/v1/execute?headed=${headed}`, { method: 'POST' });
       if (!res.body) throw new Error('La respuesta no trae stream');
 
       const reader = res.body.getReader();
@@ -54,22 +62,48 @@ export function LiveRun() {
         `__ERROR__ No se pudo conectar al backend en ${API_URL}: ${String(err)}`,
       ]);
     } finally {
-      setRunning(false);
+      setRunningMode(null);
     }
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+        {/* Ejecución supervisada: navegador visible (headed), secuencial. */}
         <button
-          onClick={start}
+          onClick={() => start('supervised')}
           disabled={running}
-          className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
+          title="Lanza la suite con el navegador visible para observar cada paso sobre la aplicación."
+          className="flex-1 rounded-lg bg-sky-500 px-4 py-3 text-left text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {running ? 'Ejecutando…' : '▶ Ejecutar suite'}
+          <span className="block text-sm font-semibold">
+            {runningMode === 'supervised' ? 'Ejecutando…' : '▶ Ejecución supervisada'}
+          </span>
+          <span className="block text-xs text-sky-100/80">Navegador visible · paso a paso</span>
         </button>
-        {running && <span className="text-sm text-sky-300">streaming en vivo…</span>}
-        {done && <span className="text-sm text-pass">✓ ejecución finalizada</span>}
+
+        {/* Ejecución desatendida: headless, en segundo plano. */}
+        <button
+          onClick={() => start('unattended')}
+          disabled={running}
+          title="Ejecuta la suite en segundo plano, sin abrir navegador (headless)."
+          className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-left text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <span className="block text-sm font-semibold">
+            {runningMode === 'unattended' ? 'Ejecutando…' : '◧ Ejecución desatendida'}
+          </span>
+          <span className="block text-xs text-slate-400">Segundo plano · sin interfaz (headless)</span>
+        </button>
+      </div>
+
+      <div className="flex items-center gap-3 text-sm">
+        {runningMode === 'supervised' && (
+          <span className="text-sky-300">navegador visible · streaming en vivo…</span>
+        )}
+        {runningMode === 'unattended' && (
+          <span className="text-sky-300">segundo plano · streaming en vivo…</span>
+        )}
+        {done && <span className="text-pass">✓ ejecución finalizada</span>}
       </div>
 
       <pre
@@ -77,7 +111,7 @@ export function LiveRun() {
         className="h-[28rem] overflow-auto rounded-xl border border-slate-800 bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-300"
       >
         {lines.length === 0
-          ? 'Pulsa "Ejecutar suite" para lanzar los tests y ver los logs en tiempo real.'
+          ? 'Elige un modo de ejecución para lanzar los tests y ver los logs en tiempo real.'
           : lines.map((line, i) => (
               <div
                 key={i}
