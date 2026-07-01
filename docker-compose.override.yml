@@ -8,6 +8,13 @@ services:
 
   # El backend corre en LOCAL (fuera de Docker) para habilitar el Live Run, que
   # necesita el toolchain JS (pnpm + Playwright) ausente en la imagen Python.
+  # Remapeamos el backend de Docker a 8010 para que, si el contenedor se levanta,
+  # NO compita por el 8000 con el backend local (evita "pnpm: not found" cuando la
+  # petición cae en el contenedor). El 8000 del host es siempre el backend local.
+  backend:
+    ports: !override
+      - "8010:8000"
+
   # Por eso el SSR del dashboard apunta al backend del host vía host.docker.internal.
   dashboard:
     environment:
