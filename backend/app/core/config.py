@@ -20,12 +20,18 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000,http://localhost:8088"
 
     # Runner de la suite Playwright (streaming).
+    #  - run_tests_cmd: ejecución desatendida (headless) -> suite completa.
+    #  - evidence_cmd: ejecución supervisada (headed) -> flujo con pasos numerados
+    #    resaltados que además genera el PDF de evidencia.
     run_tests_cmd: str = "pnpm --filter tests test"
+    evidence_cmd: str = "pnpm --filter tests evidence"
     monorepo_root: str = ".."
 
     # Retardo (ms) entre acciones en ejecución supervisada (headed), para que se
     # pueda seguir a ojo lo que hace el navegador. 0 = sin retardo (headless/CI).
     headed_slowmo_ms: int = 900
+    # Tiempo (ms) que el resaltado numerado permanece visible en cada paso.
+    headed_dwell_ms: int = 1200
 
     @property
     def cors_origins_list(self) -> list[str]:

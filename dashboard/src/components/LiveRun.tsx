@@ -79,7 +79,9 @@ export function LiveRun() {
           <span className="block text-sm font-semibold">
             {runningMode === 'supervised' ? 'Ejecutando…' : '▶ Ejecución supervisada'}
           </span>
-          <span className="block text-xs text-sky-100/80">Navegador visible · paso a paso</span>
+          <span className="block text-xs text-sky-100/80">
+            Navegador visible · pasos numerados + PDF
+          </span>
         </button>
 
         {/* Ejecución desatendida: headless, en segundo plano. */}
@@ -92,7 +94,9 @@ export function LiveRun() {
           <span className="block text-sm font-semibold">
             {runningMode === 'unattended' ? 'Ejecutando…' : '◧ Ejecución desatendida'}
           </span>
-          <span className="block text-xs text-slate-400">Segundo plano · sin interfaz (headless)</span>
+          <span className="block text-xs text-slate-400">
+            Suite completa · segundo plano (headless)
+          </span>
         </button>
       </div>
 

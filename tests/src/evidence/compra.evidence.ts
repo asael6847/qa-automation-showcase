@@ -59,9 +59,10 @@ test('evidencia: compra de varios artículos', async ({ page }, testInfo) => {
   await ev.capture(page, 'Compra finalizada: orden confirmada', CheckoutPage.completeHeader);
   await expect(page.locator(CheckoutPage.completeHeader)).toHaveText('Thank you for your order!');
 
-  // Exportar el PDF de evidencia y adjuntarlo al reporte.
+  // Exportar el PDF de evidencia y adjuntarlo al reporte. Se guarda en la
+  // carpeta `evidencias/` de la raíz del monorepo (cwd = paquete tests -> `..`).
   const stamp = new Date().toISOString().replace(/[:.]/g, '-').replace(/Z$/, '');
-  const pdfPath = path.resolve('evidence', `evidencia-compra-${stamp}.pdf`);
+  const pdfPath = path.resolve(process.cwd(), '..', 'evidencias', `evidencia-compra-${stamp}.pdf`);
   await generatePdf(ev, pdfPath);
   await testInfo.attach('Evidencia de compra (PDF)', {
     path: pdfPath,

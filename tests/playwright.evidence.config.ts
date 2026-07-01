@@ -13,6 +13,9 @@ export default defineConfig({
   fullyParallel: false,
   workers: 1,
   retries: 0,
+  // La ejecución supervisada es deliberadamente lenta (slowMo + dwell por paso);
+  // ampliamos el timeout por test para que el flujo completo quepa holgado.
+  timeout: 180_000,
   reporter: [['html', { open: 'never', outputFolder: 'evidence-report' }], ['list']],
   use: {
     ...base.use,

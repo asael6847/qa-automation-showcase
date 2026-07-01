@@ -16,9 +16,12 @@ tests/.playwright/
 # Reportes generados en cada corrida (los de ejemplo viven en dashboard/public/runs y SÍ se commitean)
 tests/reports/
 
-# Evidencia generada (PDF de pasos + su reporte HTML)
+# Evidencia generada (PDF de pasos + su reporte HTML). La carpeta `evidencias/`
+# de la raíz se versiona (con .gitkeep) pero sus PDF no.
 tests/evidence/
 tests/evidence-report/
+/evidencias/*
+!/evidencias/.gitkeep
 
 # Backend Python / uv
 backend/.venv/

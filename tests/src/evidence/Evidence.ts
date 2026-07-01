@@ -87,6 +87,15 @@ export class Evidence {
     );
 
     const screenshot = await page.screenshot();
+
+    // En ejecución supervisada dejamos el resaltado visible un instante para que
+    // se pueda leer el paso a ojo. El runner exporta EVIDENCE_DWELL_MS en headed;
+    // en headless/CI la variable no está y no hay pausa.
+    const dwell = Number(process.env.EVIDENCE_DWELL_MS ?? 0);
+    if (dwell > 0) {
+      await page.waitForTimeout(dwell);
+    }
+
     await page.evaluate(() => document.getElementById('__evidence_overlay__')?.remove());
 
     this.steps.push({ index, description, screenshot });

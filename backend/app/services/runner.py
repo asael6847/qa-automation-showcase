@@ -28,27 +28,34 @@ from app.core.execution_buffer import execution_buffer
 _executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="suite-runner")
 
 
-def _build_cmd(base_cmd: str, headed: bool) -> str:
-    """Comando final. En modo supervisado (headed) forzamos navegador visible y
-    un solo worker para que la ejecución sea secuencial y se pueda seguir a ojo.
-    El `--` reenvía los flags a Playwright a través de pnpm."""
+def _build_cmd(headed: bool) -> str:
+    """Comando final según el modo.
+
+    - Supervisado (headed): corre el flujo de evidencia (pasos numerados +
+      resaltado + PDF) con navegador visible. El `--` reenvía `--headed` a
+      Playwright a través de pnpm.
+    - Desatendido (headless): corre la suite completa tal cual.
+    """
+    settings = get_settings()
     if headed:
-        return f"{base_cmd} -- --headed --workers=1"
-    return base_cmd
+        return f"{settings.evidence_cmd} -- --headed"
+    return settings.run_tests_cmd
 
 
 def _run_blocking(execution_id: str, headed: bool) -> None:
     """Corre la suite y vuelca su salida al buffer. Se ejecuta en un hilo."""
     settings = get_settings()
-    cmd = _build_cmd(settings.run_tests_cmd, headed)
+    cmd = _build_cmd(headed)
     execution_buffer.start(execution_id)
     execution_buffer.append(execution_id, f"$ {cmd}")
 
-    # En modo supervisado exportamos PW_SLOWMO; playwright.config.ts lo aplica
-    # como launchOptions.slowMo para que la corrida se vea a velocidad humana.
+    # En modo supervisado exportamos PW_SLOWMO (velocidad de las acciones) y
+    # EVIDENCE_DWELL_MS (cuánto permanece visible el resaltado numerado de cada
+    # paso), para que la corrida se vea a velocidad humana y se lean los pasos.
     env = dict(os.environ)
     if headed:
         env["PW_SLOWMO"] = str(settings.headed_slowmo_ms)
+        env["EVIDENCE_DWELL_MS"] = str(settings.headed_dwell_ms)
 
     try:
         process = subprocess.Popen(
