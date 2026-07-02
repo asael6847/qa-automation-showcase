@@ -53,15 +53,15 @@ async def _stream_lines(execution_id: str, from_line: int = 0) -> AsyncGenerator
 
 @router.post("/execute")
 async def execute_suite(
-    evidence: bool = Query(
+    supervised: bool = Query(
         default=False,
-        description="True = flujo de compra con evidencia (genera PDF de pasos). "
-        "False = suite completa de regresión.",
+        description="True = con supervisión (navegador visible + cámara lenta). "
+        "False = sin supervisión (headless). Ambos generan el PDF de evidencia.",
     ),
 ) -> StreamingResponse:
     """Arranca la suite Playwright y transmite sus logs en vivo (text/plain)."""
     execution_id = f"exec-{uuid.uuid4().hex[:12]}"
-    start_suite_run(execution_id, evidence=evidence)
+    start_suite_run(execution_id, supervised=supervised)
     return StreamingResponse(
         _stream_lines(execution_id),
         media_type="text/plain",

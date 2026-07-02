@@ -27,11 +27,11 @@ export default function LivePage() {
       </section>
 
       <p className="mt-6 text-xs text-slate-500">
-        Nota: desde aquí la ejecución corre headless dentro del contenedor del backend y genera el PDF
-        de evidencia (pasos numerados de toda la suite) en la carpeta{' '}
-        <code className="font-mono text-slate-300">evidencias/</code>. Para ver el navegador en vivo y
-        en cámara lenta, ejecuta en tu máquina{' '}
-        <code className="font-mono text-slate-300">pnpm evidence:headed</code> (modo supervisado).
+        Ambos modos ejecutan toda la suite con los pasos numerados y generan el PDF de evidencia en la
+        carpeta <code className="font-mono text-slate-300">evidencias/</code>.{' '}
+        <strong className="text-slate-300">Con supervisión</strong> abre el navegador en cámara lenta
+        para ver cada paso (requiere el backend corriendo en tu máquina);{' '}
+        <strong className="text-slate-300">sin supervisión</strong> corre headless.
       </p>
     </main>
   );

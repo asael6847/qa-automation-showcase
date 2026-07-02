@@ -19,13 +19,15 @@ class Settings(BaseSettings):
     # CORS: lista separada por comas en la env, parseada a lista.
     cors_origins: str = "http://localhost:3000,http://localhost:8088"
 
-    # Runner de la suite Playwright (streaming). Ambos corren headless dentro del
-    # contenedor.
-    #  - run_tests_cmd: suite completa de regresión.
-    #  - evidence_cmd: flujo de compra con pasos numerados que genera el PDF de
-    #    evidencia en `evidencias/`.
-    run_tests_cmd: str = "pnpm --filter tests test"
+    # Runner de la suite Playwright (streaming). Ambos corren TODA la suite con
+    # pasos numerados y generan el PDF de evidencia en `evidencias/`.
+    #  - evidence_cmd:   sin supervisión (headless).
+    #  - supervised_cmd: con supervisión (navegador VISIBLE + cámara lenta).
+    #    Requiere ejecutar el backend en el host (un contenedor no tiene pantalla).
     evidence_cmd: str = "pnpm --filter tests evidence"
+    supervised_cmd: str = "pnpm --filter tests evidence:headed"
+    # Suite de regresión "cruda" (sin evidencia), por si se necesita.
+    run_tests_cmd: str = "pnpm --filter tests test"
     monorepo_root: str = ".."
 
     @property

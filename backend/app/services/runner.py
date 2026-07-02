@@ -28,20 +28,20 @@ from app.core.execution_buffer import execution_buffer
 _executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="suite-runner")
 
 
-def _build_cmd(evidence: bool) -> str:
-    """Comando final según el modo (ambos headless dentro del contenedor).
+def _build_cmd(supervised: bool) -> str:
+    """Comando final según el modo. Ambos corren toda la suite con evidencia (PDF).
 
-    - evidence=True: flujo de compra con pasos numerados que genera el PDF.
-    - evidence=False: suite completa de regresión.
+    - supervised=True:  navegador VISIBLE + cámara lenta (para verlo en vivo).
+    - supervised=False: headless (sin ventana).
     """
     settings = get_settings()
-    return settings.evidence_cmd if evidence else settings.run_tests_cmd
+    return settings.supervised_cmd if supervised else settings.evidence_cmd
 
 
-def _run_blocking(execution_id: str, evidence: bool) -> None:
+def _run_blocking(execution_id: str, supervised: bool) -> None:
     """Corre la suite y vuelca su salida al buffer. Se ejecuta en un hilo."""
     settings = get_settings()
-    cmd = _build_cmd(evidence)
+    cmd = _build_cmd(supervised)
     execution_buffer.start(execution_id)
     execution_buffer.append(execution_id, f"$ {cmd}")
 
@@ -67,10 +67,10 @@ def _run_blocking(execution_id: str, evidence: bool) -> None:
         execution_buffer.finish(execution_id)
 
 
-def start_suite_run(execution_id: str, evidence: bool = False) -> None:
+def start_suite_run(execution_id: str, supervised: bool = False) -> None:
     """Despacha la corrida al ThreadPool y retorna de inmediato (no bloquea).
 
-    `evidence=True` corre el flujo de compra con evidencia (genera PDF); por
-    defecto corre la suite completa de regresión.
+    `supervised=True` corre con navegador visible (cámara lenta); por defecto
+    corre headless. Ambos generan el PDF de evidencia.
     """
-    _executor.submit(_run_blocking, execution_id, evidence)
+    _executor.submit(_run_blocking, execution_id, supervised)
