@@ -12,7 +12,7 @@ const DONE = '__DONE__';
  * leyendo el cuerpo de la respuesta como un stream (ReadableStream + reader).
  * Esto demuestra el camino streaming end-to-end: subprocess → buffer → HTTP → UI.
  */
-type RunMode = 'supervised' | 'unattended';
+type RunMode = 'evidence' | 'suite';
 
 export function LiveRun() {
   const [lines, setLines] = useState<string[]>([]);
@@ -34,9 +34,9 @@ export function LiveRun() {
     setDone(false);
     setRunningMode(mode);
     try {
-      // headed=true -> ejecución supervisada (navegador visible).
-      const headed = mode === 'supervised';
-      const res = await fetch(`${API_URL}/api/v1/execute?headed=${headed}`, { method: 'POST' });
+      // evidence=true -> flujo de compra con PDF de pasos; false -> suite completa.
+      const evidence = mode === 'evidence';
+      const res = await fetch(`${API_URL}/api/v1/execute?evidence=${evidence}`, { method: 'POST' });
       if (!res.body) throw new Error('La respuesta no trae stream');
 
       const reader = res.body.getReader();
@@ -69,43 +69,41 @@ export function LiveRun() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
-        {/* Ejecución supervisada: navegador visible (headed), secuencial. */}
+        {/* Ejecución con evidencia: flujo de compra que genera el PDF de pasos. */}
         <button
-          onClick={() => start('supervised')}
+          onClick={() => start('evidence')}
           disabled={running}
-          title="Lanza la suite con el navegador visible para observar cada paso sobre la aplicación."
+          title="Corre el flujo de compra y genera un PDF con los pasos numerados en la carpeta evidencias/."
           className="flex-1 rounded-lg bg-sky-500 px-4 py-3 text-left text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <span className="block text-sm font-semibold">
-            {runningMode === 'supervised' ? 'Ejecutando…' : '▶ Ejecución supervisada'}
+            {runningMode === 'evidence' ? 'Ejecutando…' : '▶ Ejecutar con evidencia'}
           </span>
           <span className="block text-xs text-sky-100/80">
-            Navegador visible · pasos numerados + PDF
+            Flujo de compra · PDF de pasos numerados
           </span>
         </button>
 
-        {/* Ejecución desatendida: headless, en segundo plano. */}
+        {/* Suite completa de regresión (headless). */}
         <button
-          onClick={() => start('unattended')}
+          onClick={() => start('suite')}
           disabled={running}
-          title="Ejecuta la suite en segundo plano, sin abrir navegador (headless)."
+          title="Ejecuta la suite completa de regresión (headless)."
           className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-left text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <span className="block text-sm font-semibold">
-            {runningMode === 'unattended' ? 'Ejecutando…' : '◧ Ejecución desatendida'}
+            {runningMode === 'suite' ? 'Ejecutando…' : '◧ Suite completa'}
           </span>
-          <span className="block text-xs text-slate-400">
-            Suite completa · segundo plano (headless)
-          </span>
+          <span className="block text-xs text-slate-400">Regresión · toda la suite (headless)</span>
         </button>
       </div>
 
       <div className="flex items-center gap-3 text-sm">
-        {runningMode === 'supervised' && (
-          <span className="text-sky-300">navegador visible · streaming en vivo…</span>
+        {runningMode === 'evidence' && (
+          <span className="text-sky-300">generando evidencia · streaming en vivo…</span>
         )}
-        {runningMode === 'unattended' && (
-          <span className="text-sky-300">segundo plano · streaming en vivo…</span>
+        {runningMode === 'suite' && (
+          <span className="text-sky-300">corriendo la suite · streaming en vivo…</span>
         )}
         {done && <span className="text-pass">✓ ejecución finalizada</span>}
       </div>

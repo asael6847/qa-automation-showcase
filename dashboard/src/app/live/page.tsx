@@ -27,9 +27,9 @@ export default function LivePage() {
       </section>
 
       <p className="mt-6 text-xs text-slate-500">
-        Nota: el runner en vivo requiere el toolchain de Node/pnpm en el host del backend. En el
-        contenedor Python liviano puede no estar disponible; en ese caso verás un error de ejecución
-        (esperado) — el ETL y la API REST sí funcionan en Docker.
+        Nota: la ejecución corre headless dentro del contenedor del backend (con Node/pnpm/Playwright
+        incluidos). El modo &ldquo;con evidencia&rdquo; genera un PDF de pasos numerados en la carpeta{' '}
+        <code className="font-mono text-slate-300">evidencias/</code> del proyecto.
       </p>
     </main>
   );
