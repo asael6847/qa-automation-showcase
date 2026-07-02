@@ -10,6 +10,7 @@
     "test": "pnpm --filter tests test",
     "test:report": "pnpm --filter tests show-report",
     "evidence": "pnpm --filter tests evidence",
+    "evidence:headed": "pnpm --filter tests evidence:headed",
     "report:save": "node scripts/save-run.mjs",
     "dashboard:dev": "pnpm --filter dashboard dev",
     "dashboard:build": "pnpm --filter dashboard build",

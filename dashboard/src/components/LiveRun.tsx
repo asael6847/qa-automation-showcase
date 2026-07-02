@@ -73,14 +73,14 @@ export function LiveRun() {
         <button
           onClick={() => start('evidence')}
           disabled={running}
-          title="Corre el flujo de compra y genera un PDF con los pasos numerados en la carpeta evidencias/."
+          title="Corre toda la suite y genera un PDF con los pasos numerados en la carpeta evidencias/."
           className="flex-1 rounded-lg bg-sky-500 px-4 py-3 text-left text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <span className="block text-sm font-semibold">
-            {runningMode === 'evidence' ? 'Ejecutando…' : '▶ Ejecutar con evidencia'}
+            {runningMode === 'evidence' ? 'Ejecutando…' : '▶ Suite con evidencia'}
           </span>
           <span className="block text-xs text-sky-100/80">
-            Flujo de compra · PDF de pasos numerados
+            Toda la suite · PDF de pasos numerados
           </span>
         </button>
 

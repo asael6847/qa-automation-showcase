@@ -1,8 +1,8 @@
 import type { Page } from '@playwright/test';
 
 /**
- * Un paso de evidencia: número secuencial, descripción legible y la captura de
- * pantalla (PNG) que lo respalda.
+ * Un paso de evidencia: número secuencial global, descripción legible y la
+ * captura de pantalla (PNG) que lo respalda.
  */
 export interface EvidenceStep {
   index: number;
@@ -10,27 +10,46 @@ export interface EvidenceStep {
   screenshot: Buffer;
 }
 
+/** Una sección agrupa los pasos de un escenario (un test) del reporte. */
+export interface EvidenceSection {
+  title: string;
+  steps: EvidenceStep[];
+}
+
 /**
- * Grabador de evidencia de ejecución. Durante el recorrido de un test, `capture`
- * resalta el elemento con el que se va a interactuar (recuadro rojo + un badge
- * numerado) y una etiqueta con la descripción del paso, y toma una captura del
- * viewport. Al final, los pasos acumulados se exportan a un PDF (ver `pdf.ts`).
+ * Grabador de evidencia de ejecución compartido por toda la suite. Cada test
+ * abre una sección (`startSection`) y luego `capture` va registrando pasos:
+ * resalta el elemento con el que se interactúa (recuadro rojo + badge numerado)
+ * y una etiqueta con el escenario y la descripción del paso, y toma una captura
+ * del viewport. Al final los pasos se exportan a un único PDF (ver `pdf.ts`).
  *
  * Se trabaja sobre el viewport (no full-page) a propósito: así el overlay de
  * resaltado —posicionado con `position: fixed`— queda perfectamente alineado con
  * el elemento en la imagen, algo que no ocurre en capturas full-page.
  */
 export class Evidence {
-  private readonly steps: EvidenceStep[] = [];
+  private readonly sections: EvidenceSection[] = [];
+  private total = 0;
 
   constructor(private readonly title: string) {}
 
+  /** Abre una nueva sección (un escenario) en el reporte. */
+  startSection(title: string): void {
+    this.sections.push({ title, steps: [] });
+  }
+
   /**
-   * Captura un paso. Si se indica `targetSelector`, se centra y resalta ese
-   * elemento con el número de paso; en cualquier caso se rotula la descripción.
+   * Captura un paso dentro de la sección actual. Si se indica `targetSelector`,
+   * se centra y resalta ese elemento con el número de paso; en cualquier caso se
+   * rotula el escenario y la descripción.
    */
   async capture(page: Page, description: string, targetSelector?: string): Promise<void> {
-    const index = this.steps.length + 1;
+    if (this.sections.length === 0) {
+      this.startSection('General');
+    }
+    const section = this.sections[this.sections.length - 1];
+    const index = ++this.total;
+    const sectionTitle = section.title;
 
     // Resolvemos el elemento con el locator de Playwright (entiende sus propios
     // selectores :has/:text-is, que no son CSS válido) y pasamos su rectángulo
@@ -43,7 +62,7 @@ export class Evidence {
     }
 
     await page.evaluate(
-      ({ rect, step, text }) => {
+      ({ rect, step, text, section }) => {
         const OVERLAY_ID = '__evidence_overlay__';
         document.getElementById(OVERLAY_ID)?.remove();
 
@@ -51,12 +70,14 @@ export class Evidence {
         overlay.id = OVERLAY_ID;
         overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;pointer-events:none;';
 
-        // Etiqueta inferior con el número y la descripción del paso.
+        // Etiqueta inferior con el escenario, el número y la descripción del paso.
         const banner = document.createElement('div');
-        banner.textContent = `Paso ${step}: ${text}`;
+        banner.innerHTML =
+          `<span style="opacity:.7">${section}</span> &nbsp;·&nbsp; ` +
+          `<strong>Paso ${step}:</strong> ${text}`;
         banner.style.cssText =
           'position:fixed;left:0;right:0;bottom:0;background:#0f172a;color:#fff;' +
-          'font:600 15px/1.4 system-ui,-apple-system,sans-serif;padding:12px 18px;' +
+          'font:400 15px/1.4 system-ui,-apple-system,sans-serif;padding:12px 18px;' +
           'border-top:3px solid #ef4444;';
         overlay.appendChild(banner);
 
@@ -83,14 +104,14 @@ export class Evidence {
 
         document.body.appendChild(overlay);
       },
-      { rect, step: index, text: description },
+      { rect, step: index, text: description, section: sectionTitle },
     );
 
     const screenshot = await page.screenshot();
 
     // En ejecución supervisada dejamos el resaltado visible un instante para que
-    // se pueda leer el paso a ojo. El runner exporta EVIDENCE_DWELL_MS en headed;
-    // en headless/CI la variable no está y no hay pausa.
+    // se pueda leer el paso a ojo. Se activa con EVIDENCE_DWELL_MS; en headless
+    // sin la variable no hay pausa.
     const dwell = Number(process.env.EVIDENCE_DWELL_MS ?? 0);
     if (dwell > 0) {
       await page.waitForTimeout(dwell);
@@ -98,14 +119,18 @@ export class Evidence {
 
     await page.evaluate(() => document.getElementById('__evidence_overlay__')?.remove());
 
-    this.steps.push({ index, description, screenshot });
+    section.steps.push({ index, description, screenshot });
   }
 
   getTitle(): string {
     return this.title;
   }
 
-  getSteps(): readonly EvidenceStep[] {
-    return this.steps;
+  getSections(): readonly EvidenceSection[] {
+    return this.sections;
+  }
+
+  getStepCount(): number {
+    return this.total;
   }
 }

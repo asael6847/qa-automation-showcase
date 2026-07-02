@@ -27,9 +27,11 @@ export default function LivePage() {
       </section>
 
       <p className="mt-6 text-xs text-slate-500">
-        Nota: la ejecución corre headless dentro del contenedor del backend (con Node/pnpm/Playwright
-        incluidos). El modo &ldquo;con evidencia&rdquo; genera un PDF de pasos numerados en la carpeta{' '}
-        <code className="font-mono text-slate-300">evidencias/</code> del proyecto.
+        Nota: desde aquí la ejecución corre headless dentro del contenedor del backend y genera el PDF
+        de evidencia (pasos numerados de toda la suite) en la carpeta{' '}
+        <code className="font-mono text-slate-300">evidencias/</code>. Para ver el navegador en vivo y
+        en cámara lenta, ejecuta en tu máquina{' '}
+        <code className="font-mono text-slate-300">pnpm evidence:headed</code> (modo supervisado).
       </p>
     </main>
   );

@@ -8,6 +8,7 @@
     "test:headed": "playwright test --headed",
     "show-report": "playwright show-report",
     "evidence": "playwright test --config=playwright.evidence.config.ts",
+    "evidence:headed": "PW_SLOWMO=600 EVIDENCE_DWELL_MS=800 playwright test --config=playwright.evidence.config.ts --headed",
     "lint": "eslint \"src/**/*.ts\""
   },
   "devDependencies": {
