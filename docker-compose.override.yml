@@ -1,14 +1,21 @@
-# Override local: el puerto host 5433 ya lo ocupa otro proyecto (qa_db).
-# Remapeamos el Postgres de este stack a 5434 en el host. El backend sigue
-# conectando internamente por postgres:5432, así que esto no afecta el flujo.
+# Override local. Dos ajustes:
+#
+# 1) Postgres: el puerto host 5433 lo ocupa otro proyecto -> lo remapeamos a 5434.
+#
+# 2) El backend corre en el HOST (no en Docker) para poder abrir el navegador
+#    VISIBLE del modo "con supervisión" (un contenedor no tiene pantalla). Por eso:
+#      - el backend de Docker se remapea a 8010 (queda inofensivo si se levanta;
+#        el 8000 del host es siempre el backend local), y
+#      - el SSR del dashboard apunta al backend del host vía host.docker.internal.
 services:
   postgres:
     ports: !override
       - "5434:5432"
 
-  # El backend corre en LOCAL (fuera de Docker) para habilitar el Live Run, que
-  # necesita el toolchain JS (pnpm + Playwright) ausente en la imagen Python.
-  # Por eso el SSR del dashboard apunta al backend del host vía host.docker.internal.
+  backend:
+    ports: !override
+      - "8010:8000"
+
   dashboard:
     environment:
       API_INTERNAL_URL: http://host.docker.internal:8000

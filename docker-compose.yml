@@ -22,7 +22,10 @@ services:
 
   backend:
     build:
-      context: ./backend
+      # Contexto = raíz del monorepo: la imagen incluye el paquete `tests` para
+      # que el runner del Live Run ejecute la suite E2E dentro del contenedor.
+      context: .
+      dockerfile: backend/Dockerfile
     depends_on:
       postgres:
         condition: service_healthy
@@ -31,6 +34,10 @@ services:
       CORS_ORIGINS: http://localhost:3000,http://localhost:8088
     ports:
       - "8000:8000"
+    volumes:
+      # Los PDF de evidencia generados por el Live Run quedan en la carpeta
+      # `evidencias/` del host.
+      - ./evidencias:/app/evidencias
 
   dashboard:
     build:

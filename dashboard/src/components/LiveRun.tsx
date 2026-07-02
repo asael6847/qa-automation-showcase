@@ -34,9 +34,11 @@ export function LiveRun() {
     setDone(false);
     setRunningMode(mode);
     try {
-      // headed=true -> ejecución supervisada (navegador visible).
-      const headed = mode === 'supervised';
-      const res = await fetch(`${API_URL}/api/v1/execute?headed=${headed}`, { method: 'POST' });
+      // supervised=true -> navegador visible + cámara lenta; false -> headless.
+      const supervised = mode === 'supervised';
+      const res = await fetch(`${API_URL}/api/v1/execute?supervised=${supervised}`, {
+        method: 'POST',
+      });
       if (!res.body) throw new Error('La respuesta no trae stream');
 
       const reader = res.body.getReader();
@@ -69,39 +71,41 @@ export function LiveRun() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
-        {/* Ejecución supervisada: navegador visible (headed), secuencial. */}
+        {/* Con supervisión: navegador VISIBLE + cámara lenta (requiere backend host). */}
         <button
           onClick={() => start('supervised')}
           disabled={running}
-          title="Lanza la suite con el navegador visible para observar cada paso sobre la aplicación."
+          title="Abre el navegador y ejecuta toda la suite en cámara lenta para ver cada paso. Genera el PDF de evidencia."
           className="flex-1 rounded-lg bg-sky-500 px-4 py-3 text-left text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <span className="block text-sm font-semibold">
-            {runningMode === 'supervised' ? 'Ejecutando…' : '▶ Ejecución supervisada'}
+            {runningMode === 'supervised' ? 'Ejecutando…' : '▶ Con supervisión'}
           </span>
-          <span className="block text-xs text-sky-100/80">Navegador visible · paso a paso</span>
+          <span className="block text-xs text-sky-100/80">
+            Abre el navegador · cámara lenta · PDF
+          </span>
         </button>
 
-        {/* Ejecución desatendida: headless, en segundo plano. */}
+        {/* Sin supervisión: headless. */}
         <button
           onClick={() => start('unattended')}
           disabled={running}
-          title="Ejecuta la suite en segundo plano, sin abrir navegador (headless)."
+          title="Ejecuta toda la suite en segundo plano, sin abrir navegador. Genera el PDF de evidencia."
           className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-left text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <span className="block text-sm font-semibold">
-            {runningMode === 'unattended' ? 'Ejecutando…' : '◧ Ejecución desatendida'}
+            {runningMode === 'unattended' ? 'Ejecutando…' : '◧ Sin supervisión'}
           </span>
-          <span className="block text-xs text-slate-400">Segundo plano · sin interfaz (headless)</span>
+          <span className="block text-xs text-slate-400">Headless · segundo plano · PDF</span>
         </button>
       </div>
 
       <div className="flex items-center gap-3 text-sm">
         {runningMode === 'supervised' && (
-          <span className="text-sky-300">navegador visible · streaming en vivo…</span>
+          <span className="text-sky-300">navegador visible · cámara lenta · streaming…</span>
         )}
         {runningMode === 'unattended' && (
-          <span className="text-sky-300">segundo plano · streaming en vivo…</span>
+          <span className="text-sky-300">headless · streaming en vivo…</span>
         )}
         {done && <span className="text-pass">✓ ejecución finalizada</span>}
       </div>
