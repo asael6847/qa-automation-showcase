@@ -12,7 +12,7 @@ type ScreenplayFixtures = {
 
 export const test = base.extend<ScreenplayFixtures>({
   actor: async ({ page }, use) => {
-    const actor = Actor.named('Ana').can(BrowseTheWeb.using(page));
+    const actor = Actor.named('Asael').can(BrowseTheWeb.using(page));
     await use(actor);
   },
 });

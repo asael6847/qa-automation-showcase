@@ -12,13 +12,16 @@ import { OrderConfirmation } from '../questions/OrderConfirmation';
 
 const PASSWORD = 'secret_sauce';
 
+/** Datos del comprador usados en todo checkout de la suite. */
+const COMPRADOR = { nombre: 'Asael', apellido: 'SDET', codigoPostal: '170101' } as const;
+
 test.describe('Checkout', () => {
   test('flujo completo de compra termina con orden confirmada', async ({ actor }) => {
     // El test se lee como la historia de usuario: ingresar, agregar, comprar.
     await actor.attemptsTo(
       Login.withCredentials('standard_user', PASSWORD),
       AddProductToCart.named('Sauce Labs Backpack'),
-      Checkout.withCustomerDetails('Ana', 'Quishpe', '170101'),
+      Checkout.withCustomerDetails(COMPRADOR.nombre, COMPRADOR.apellido, COMPRADOR.codigoPostal),
     );
 
     expect(await actor.asks(OrderConfirmation.message())).toBe('Thank you for your order!');
@@ -39,7 +42,11 @@ test.describe('Checkout', () => {
     // Avanzar al resumen de la orden con los datos del comprador.
     await actor.attemptsTo(
       ProceedToCheckout.now(),
-      ProvideCheckoutDetails.withCustomerDetails('Ana', 'Quishpe', '170101'),
+      ProvideCheckoutDetails.withCustomerDetails(
+        COMPRADOR.nombre,
+        COMPRADOR.apellido,
+        COMPRADOR.codigoPostal,
+      ),
     );
 
     // El resumen lista exactamente los artículos que se van a comprar.

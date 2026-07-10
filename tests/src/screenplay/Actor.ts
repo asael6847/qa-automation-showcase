@@ -24,7 +24,7 @@ export class Actor {
     return new Actor(name);
   }
 
-  /** Otorga una habilidad al actor. Encadenable: `Actor.named('Ana').can(...)`. */
+  /** Otorga una habilidad al actor. Encadenable: `Actor.named('Asael').can(...)`. */
   can(ability: Ability): this {
     this.abilities.set(ability.constructor as AbilityConstructor<Ability>, ability);
     return this;

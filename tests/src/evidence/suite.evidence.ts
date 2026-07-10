@@ -15,6 +15,22 @@ import { CheckoutPage } from '../pages/CheckoutPage';
 const PASSWORD = 'secret_sauce';
 const PRODUCTOS = ['Sauce Labs Backpack', 'Sauce Labs Bike Light', 'Sauce Labs Bolt T-Shirt'];
 
+/** Datos del comprador usados en todo checkout de la evidencia. */
+const COMPRADOR = { nombre: 'Asael', apellido: 'SDET', codigoPostal: '170101' } as const;
+
+/** Llena el formulario del comprador. El paso se rotula con el nombre usado. */
+async function llenarDatosDelComprador(page: Page, evidence: Evidence): Promise<void> {
+  await page.fill(CheckoutPage.firstNameInput, COMPRADOR.nombre);
+  await page.fill(CheckoutPage.lastNameInput, COMPRADOR.apellido);
+  await page.fill(CheckoutPage.postalCodeInput, COMPRADOR.codigoPostal);
+  await evidence.capture(
+    page,
+    `Completar los datos de ${COMPRADOR.nombre} ${COMPRADOR.apellido} y continuar`,
+    CheckoutPage.continueButton,
+  );
+  await page.click(CheckoutPage.continueButton);
+}
+
 /** Inicia sesión capturando cada paso. Deja al actor en el inventario. */
 async function loginConEvidencia(page: Page, evidence: Evidence, user: string): Promise<void> {
   await page.goto(LoginPage.url);
@@ -89,11 +105,7 @@ test.describe('Evidencia — Suite E2E', () => {
     await page.click(InventoryPage.shoppingCartLink);
     await evidence.capture(page, 'Continuar al checkout', CartPage.checkoutButton);
     await page.click(CartPage.checkoutButton);
-    await page.fill(CheckoutPage.firstNameInput, 'Ana');
-    await page.fill(CheckoutPage.lastNameInput, 'Quishpe');
-    await page.fill(CheckoutPage.postalCodeInput, '170101');
-    await evidence.capture(page, 'Completar los datos del comprador y continuar', CheckoutPage.continueButton);
-    await page.click(CheckoutPage.continueButton);
+    await llenarDatosDelComprador(page, evidence);
     await evidence.capture(page, 'Finalizar la compra', CheckoutPage.finishButton);
     await page.click(CheckoutPage.finishButton);
     await evidence.capture(page, 'Orden confirmada', CheckoutPage.completeHeader);
@@ -109,11 +121,7 @@ test.describe('Evidencia — Suite E2E', () => {
     await page.click(InventoryPage.shoppingCartLink);
     await evidence.capture(page, 'Continuar al checkout', CartPage.checkoutButton);
     await page.click(CartPage.checkoutButton);
-    await page.fill(CheckoutPage.firstNameInput, 'Ana');
-    await page.fill(CheckoutPage.lastNameInput, 'Quishpe');
-    await page.fill(CheckoutPage.postalCodeInput, '170101');
-    await evidence.capture(page, 'Completar los datos del comprador y continuar', CheckoutPage.continueButton);
-    await page.click(CheckoutPage.continueButton);
+    await llenarDatosDelComprador(page, evidence);
     await evidence.capture(page, 'Resumen con los artículos; finalizar la compra', CheckoutPage.finishButton);
     await page.click(CheckoutPage.finishButton);
     await evidence.capture(page, 'Orden confirmada', CheckoutPage.completeHeader);
