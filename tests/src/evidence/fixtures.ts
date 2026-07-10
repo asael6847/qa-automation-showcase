@@ -8,8 +8,9 @@ import { generatePdf } from './pdf';
  * los pasos de TODOS los escenarios de la corrida; al terminar el worker (con
  * workers=1, al terminar toda la suite) se exporta un único PDF a `evidencias/`.
  *
- * El fixture `evidence` (alcance de test) abre una sección por cada test con su
- * título, de modo que el reporte quede organizado por escenario.
+ * El fixture `evidence` (alcance de test) abre una prueba numerada por cada test
+ * con su título, de modo que el reporte quede organizado por prueba y los pasos
+ * se numeren desde 1 en cada una.
  */
 type WorkerFixtures = { evidenceRecorder: Evidence };
 type TestFixtures = { evidence: Evidence };
@@ -32,8 +33,10 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
     { scope: 'worker' },
   ],
 
-  evidence: async ({ evidenceRecorder }, use, testInfo) => {
+  evidence: async ({ page, evidenceRecorder }, use, testInfo) => {
     evidenceRecorder.startSection(testInfo.title);
+    // Cartel con "Prueba N.º X — <título>" antes del paso 1 (sólo supervisada).
+    await evidenceRecorder.announceSection(page);
     await use(evidenceRecorder);
   },
 });
