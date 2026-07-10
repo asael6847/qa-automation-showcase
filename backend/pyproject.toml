@@ -2,7 +2,9 @@
 name = "qa-showcase-backend"
 version = "1.0.0"
 description = "Backend FastAPI para QA Automation Showcase: ETL de reportes Playwright, API REST async y streaming de ejecuciones en vivo."
-readme = "README.md"
+# Sin `readme`: el .gitignore del repo excluye todos los *.md, así que un clon
+# limpio no tendría README.md y el build del paquete fallaría (hatchling exige
+# que el archivo declarado exista).
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115.0",

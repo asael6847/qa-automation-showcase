@@ -23,7 +23,7 @@ RUN npm install -g pnpm@9
 WORKDIR /app
 
 # 1) Dependencias del backend (capa cacheable mientras no cambie el lock).
-COPY backend/pyproject.toml backend/uv.lock backend/README.md ./backend/
+COPY backend/pyproject.toml backend/uv.lock ./backend/
 RUN cd backend && uv sync --frozen --no-dev --no-install-project
 
 # 2) Dependencias JS del workspace, sólo las del paquete `tests` (cacheable).
