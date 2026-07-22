@@ -1,0 +1,33 @@
+# Blueprint de Render (infra como código). Define el backend como un web service
+# Docker que Render construye desde `backend/Dockerfile`. Render auto-despliega en
+# cada push a `main` (pipeline GitHub -> Render nativo, sin GitHub Actions).
+#
+# Alta: en el dashboard de Render -> New -> Blueprint -> conectar este repo.
+# Render lee este archivo y crea el servicio. El DATABASE_URL (Neon) se pone a
+# mano en el dashboard (marcado sync:false para no versionar secretos).
+services:
+  - type: web
+    name: qa-showcase-backend
+    runtime: docker
+    # Contexto = raíz del monorepo; el Dockerfile vive en backend/. Sus rutas COPY
+    # (backend/, tests/, ...) resuelven relativas a la raíz.
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    plan: free
+    region: oregon
+    branch: main
+    # Render espera 200 aquí antes de marcar el deploy como "live". El endpoint
+    # responde 200 incluso en modo "degraded" (sin DB), gracias al bypass de arranque.
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      # CORS: se actualizará con la URL real de Vercel cuando el dashboard esté arriba.
+      - key: CORS_ORIGINS
+        value: "http://localhost:3000,http://localhost:8088"
+      # Logs sin buffer para verlos en vivo en Render.
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      # Secreto: se rellena en el dashboard de Render (connection string de Neon,
+      # en formato postgresql+asyncpg://...?ssl=require). No se versiona.
+      - key: DATABASE_URL
+        sync: false

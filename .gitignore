@@ -35,6 +35,10 @@ backend/.ruff_cache/
 .env.local
 *.log
 
+# Vercel: credenciales locales y config del proyecto (orgId/projectId).
+# El deploy usa Secrets de GitHub, no este directorio.
+.vercel/
+
 # OS / editores
 .DS_Store
 .idea/

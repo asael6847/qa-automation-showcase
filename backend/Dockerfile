@@ -47,5 +47,7 @@ ENV PATH="/app/backend/.venv/bin:$PATH" \
     MONOREPO_ROOT="/app"
 
 EXPOSE 8000
+# El puerto lo puede fijar el host: Render (u otros PaaS) inyectan $PORT. Sin esa
+# variable (p.ej. docker-compose) cae en 8000. Forma shell para expandir ${PORT}.
 # --app-dir añade /app/backend a sys.path para importar app.main.
-CMD ["uvicorn", "app.main:app", "--app-dir", "backend", "--host", "0.0.0.0", "--port", "8000"]
+CMD uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port ${PORT:-8000}
