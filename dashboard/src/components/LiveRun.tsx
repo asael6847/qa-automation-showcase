@@ -75,14 +75,14 @@ export function LiveRun() {
         <button
           onClick={() => start('supervised')}
           disabled={running}
-          title="Abre el navegador y ejecuta toda la suite en cámara lenta para ver cada paso. Genera el PDF de evidencia."
+          title="Ejecuta la suite E2E. El navegador visible en cámara lenta es una función del modo local; en la nube corre headless."
           className="flex-1 rounded-lg bg-sky-500 px-4 py-3 text-left text-white transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <span className="block text-sm font-semibold">
             {runningMode === 'supervised' ? 'Ejecutando…' : '▶ Con supervisión'}
           </span>
           <span className="block text-xs text-sky-100/80">
-            Abre el navegador · cámara lenta · PDF
+            Navegador visible · cámara lenta (modo local)
           </span>
         </button>
 
@@ -90,15 +90,26 @@ export function LiveRun() {
         <button
           onClick={() => start('unattended')}
           disabled={running}
-          title="Ejecuta toda la suite en segundo plano, sin abrir navegador. Genera el PDF de evidencia."
+          title="Ejecuta toda la suite E2E headless en el backend de la nube y transmite los logs en vivo."
           className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 text-left text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <span className="block text-sm font-semibold">
             {runningMode === 'unattended' ? 'Ejecutando…' : '◧ Sin supervisión'}
           </span>
-          <span className="block text-xs text-slate-400">Headless · segundo plano · PDF</span>
+          <span className="block text-xs text-slate-400">Headless · corre la suite E2E en la nube</span>
         </button>
       </div>
+
+      {/* PDF de evidencia: artefacto real pre-generado de una corrida, servido
+          estáticamente (la generación en vivo no cabe en el plan free del backend). */}
+      <a
+        href="/evidencia-suite.pdf"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 rounded-lg border border-emerald-700/50 bg-emerald-900/20 px-4 py-2 text-sm font-medium text-emerald-300 transition hover:bg-emerald-900/40"
+      >
+        ⬇ Descargar PDF de evidencia (corrida real)
+      </a>
 
       <div className="flex items-center gap-3 text-sm">
         {runningMode === 'supervised' && (

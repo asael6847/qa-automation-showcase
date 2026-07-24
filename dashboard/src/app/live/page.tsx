@@ -27,11 +27,12 @@ export default function LivePage() {
       </section>
 
       <p className="mt-6 text-xs text-slate-500">
-        Ambos modos ejecutan toda la suite con los pasos numerados y generan el PDF de evidencia en la
-        carpeta <code className="font-mono text-slate-300">evidencias/</code>.{' '}
-        <strong className="text-slate-300">Con supervisión</strong> abre el navegador en cámara lenta
-        para ver cada paso (requiere el backend corriendo en tu máquina);{' '}
-        <strong className="text-slate-300">sin supervisión</strong> corre headless.
+        El botón <strong className="text-slate-300">Sin supervisión</strong> corre la suite E2E
+        headless en el backend de la nube y transmite los logs en vivo. El{' '}
+        <strong className="text-slate-300">PDF de evidencia</strong> (con los pasos numerados y las
+        capturas resaltadas) es una corrida real, descargable arriba. El modo{' '}
+        <strong className="text-slate-300">con supervisión</strong> —navegador visible en cámara
+        lenta— es una función del entorno local, ya que un servidor no tiene pantalla.
       </p>
     </main>
   );
